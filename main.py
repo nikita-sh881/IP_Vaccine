@@ -1,3 +1,4 @@
+"""
 import datetime 
 
 def add_animal():
@@ -42,3 +43,50 @@ if vaccination is not None:
     print(f"Прививка: {vaccine}, дата: {date}")
   
 find_animal(name)
+"""
+
+from storage import load_data, save_data
+from animals import add_animal, find_animal, list_animals
+from vaccinations import add_vaccination, show_animal_vaccinations
+
+def show_menu():
+    print("\n=== Система учета прививок животных ===")
+    print("1. Добавить животное")
+    print("2. Показать всех животных")
+    print("3. Добавить прививку")
+    print("4. Показать прививки животного")
+    print("5. Найти животное по кличке")
+    print("0. Выход")
+
+def find_animal_menu(data):
+    query = input("Введите кличку для поиска: ").strip()
+    animal = find_animal(data, query)
+    if animal is None:
+        print("Животное не найдено.")
+        return
+    print(f"Найдено: [{animal['id']}] {animal['name']} ({animal['species']}), "
+          f"{animal['age']} лет, владелец: {animal['owner']}")
+
+data = load_data()
+
+while True:
+    show_menu()
+    choice = input("Выберите пункт: ").strip()
+
+    if choice == "1":
+        add_animal(data)
+    elif choice == "2":
+        list_animals(data)
+    elif choice == "3":
+        add_vaccination(data)
+    elif choice == "4":
+        show_animal_vaccinations(data)
+    elif choice == "5":
+        find_animal_menu(data)
+    elif choice == "0":
+        save_data(data)
+        print("Выход.")
+        break
+    else:
+        print("Пункт с таким номером в меню отсутствует.")
+
