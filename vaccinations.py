@@ -1,8 +1,11 @@
 import datetime
+
+from models import Animal, Vaccination
 from animals import find_animal_by_id
 
-def add_vaccination(data):
-    if not data["animals"]:
+def add_vaccination(animals: list[Animal],
+                    vaccinations: list[Vaccination]) -> bool:
+    if not animals:
         print("Сначала добавьте хотя бы одно животное.")
         return False
 
@@ -13,7 +16,7 @@ def add_vaccination(data):
         print("id должен быть числом.")
         return False
 
-    animal = find_animal_by_id(data, animal_id)
+    animal = find_animal_by_id(animals, animal_id)
     if animal is None:
         print("Животное с таким id не найдено.")
         return False
@@ -33,30 +36,22 @@ def add_vaccination(data):
         dose = 0.0
 
     date_input = input("Введите дату (ГГГГ-ММ-ДД) или Enter: ").strip()
-    if date_input == "":
-        date = datetime.date.today().isoformat()
-    else:
-        date = date_input
+    date = date_input or datetime.date.today().isoformat()
 
-    vaccination = {
-        "animal_id": animal_id,
-        "vaccine": vaccine,
-        "dose": dose,
-        "date": date,
-    }
-    data["vaccinations"].append(vaccination)
-    print(f"Вакцинация '{vaccine}' для '{animal['name']}' зафиксирована.")
+    vaccination = Vaccination(animal_id, vaccine, dose, date)
+    vaccinations.append(vaccination)
+    animal.add_vaccination(vaccination)
+    print(f"Вакцинация '{vaccine}' для '{animal.name}' зафиксирована.")
     return True
 
-def find_vaccinations_by_animal(data, animal_id):
-    result = []
-    for v in data["vaccinations"]:
-        if v["animal_id"] == animal_id:
-            result.append(v)
-    return result
 
-def show_animal_vaccinations(data):
-    if not data["animals"]:
+def find_vaccinations_by_animal(
+        animal: Animal) -> list[Vaccination]:
+    return list(animal.vaccinations)
+
+
+def show_animal_vaccinations(animals: list[Animal]) -> None:
+    if not animals:
         print("Список животных пуст.")
         return
 
@@ -67,15 +62,14 @@ def show_animal_vaccinations(data):
         print("id должен быть числом.")
         return
 
-    animal = find_animal_by_id(data, animal_id)
+    animal = find_animal_by_id(animals, animal_id)
     if animal is None:
         print("Животное с таким id не найдено.")
         return
 
-    vaccinations = find_vaccinations_by_animal(data, animal_id)
-    print(f"\n--- Прививки животного '{animal['name']}' ---")
-    if not vaccinations:
+    print(f"\n--- Прививки животного '{animal.name}' ---")
+    if not animal.vaccinations:
         print("Прививок нет.")
         return
-    for v in vaccinations:
-        print(f"{v['date']}: {v['vaccine']}, {v['dose']} мл")
+    for vaccination in animal.vaccinations:
+        print(vaccination)
